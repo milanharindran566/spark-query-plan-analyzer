@@ -1,6 +1,7 @@
 import streamlit as st
 import tempfile
 from pyspark.sql import SparkSession
+from helpers.utils import clean_plan, get_color, visualize_plan
 
 spark = SparkSession.builder \
     .appName("SparkQueryAnalyzerUI") \
@@ -9,7 +10,7 @@ spark = SparkSession.builder \
 st.title("Spark Query Plan Analyzer")
 st.write("Upload a dataset and analyze Spark execution plans.")
 
-uploaded_file = st.file_uploader("Upload CSV Dataset")
+uploaded_file = st.file_uploader("Upload CSV Dataset", type=["csv"])
 
 if uploaded_file is not None:
 
@@ -48,13 +49,13 @@ if uploaded_file is not None:
             physical_plan = qe.executedPlan().toString()
 
             st.subheader("Logical Plan")
-            st.text(logical_plan)
+            st.code(clean_plan(logical_plan), language="text")
 
             st.subheader("Optimized Plan")
-            st.text(optimized_plan)
+            st.code(clean_plan(optimized_plan), language="text")
 
             st.subheader("Physical Plan")
-            st.text(physical_plan)
+            st.code(clean_plan(physical_plan), language="text")
 
             st.subheader("Query Analysis")
 
@@ -73,6 +74,10 @@ if uploaded_file is not None:
 
             if "Project" in physical_plan:
                 st.write("Projection detected")
+
+            st.subheader("Execution DAG")
+            dag = visualize_plan(physical_plan)
+            st.graphviz_chart(dag)
 
         except Exception as e:
             st.error(f"Query failed: {e}")

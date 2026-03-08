@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.log
+.env
+.vscode
+.DS_Store
+dataset.csv
+1.py

@@ -1,7 +1,7 @@
 import streamlit as st
 import tempfile
 from pyspark.sql import SparkSession
-from helpers.utils import clean_plan, get_color, visualize_plan
+from helpers.utils import clean_plan, visualize_plan, analyze_performance
 
 spark = SparkSession.builder \
     .appName("SparkQueryAnalyzerUI") \
@@ -78,6 +78,11 @@ if uploaded_file is not None:
             st.subheader("Execution DAG")
             dag = visualize_plan(physical_plan)
             st.graphviz_chart(dag)
+            
+            warnings = analyze_performance(physical_plan)
+            st.subheader("Query Performance Insights")
+            for w in warnings:
+                st.warning(w)
 
         except Exception as e:
             st.error(f"Query failed: {e}")

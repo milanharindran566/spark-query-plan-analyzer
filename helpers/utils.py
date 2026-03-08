@@ -64,3 +64,24 @@ def visualize_plan(plan_text):
         if i > 0:
             dot.edge(str(i-1), str(i))
     return dot
+
+def analyze_performance(plan):
+    warnings = []
+    shuffle_count = plan.count("Exchange")
+
+    if shuffle_count > 0:
+        warnings.append(f"⚠ Shuffle detected ({shuffle_count} stage)")
+
+    if "HashAggregate" in plan:
+        warnings.append("Aggregation detected")
+
+    if "BroadcastHashJoin" in plan:
+        warnings.append("Broadcast Join detected")
+
+    if "SortMergeJoin" in plan:
+        warnings.append("Sort Merge Join detected (shuffle heavy)")
+
+    if "FileScan" in plan:
+        warnings.append("File scan operation")
+
+    return warnings
